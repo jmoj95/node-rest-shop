@@ -1,49 +1,59 @@
 const express = require('express')
 
+const Product = require('../models/products')
+
 const router = express.Router()
 
-router.get('/', (req, res, next) => {
-  res.status(200).json({
-    message: 'Handling GET requests to /products'
-  })
+router.get('/', async (req, res, next) => {
+  try {
+    const products = await Product.find()
+    res.status(200).json(products)
+  } catch(err) {
+    res.status(500).json(err)
+  }
 })
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', async (req, res, next) => {
   const id = req.params.id
-  if (id === 'special') {
-    res.status(200).json({
-      message: 'You discovered the special ID',
-      id
-    })
-  } else {
-    res.status(200).json({
-      message: 'You passed an ID',
-      id
-    })
+  try {
+    const product = await Product.find({ _id: id })
+    res.status(200).json(product)
+  } catch(err) {
+    res.status(500).json(err)
   }
 })
 
-router.post('/', (req, res, next) => {
-  const product = {
-    name: req.body.name,
-    price: req.body.price
+router.post('/', async (req, res, next) => {
+  const product = new Product(req.body)
+  try {
+    const savedProduct = await product.save()
+    res.status(201).json(savedProduct)
   }
-  res.status(201).json({
-    message: 'Handling POST requests to /products',
-    product
-  })
+  catch(err) {
+    res.status(500).json(err)
+  }
 })
 
-router.patch('/:id', (req, res, next) => {
-  res.status(200).json({
-    message: 'Updated product.'
-  })
+router.patch('/:id', async (req, res, next) => {
+  const id = req.params.id
+  try {
+    const updatedProduct = await Product.updateOne(
+      { _id: id }, { $set: req.body }
+    )
+    res.status(200).json(updatedProduct)
+  } catch(err) {
+    res.status(500).json(err)
+  }
 })
 
-router.delete('/:id', (req, res, next) => {
-  res.status(200).json({
-    message: 'Deleted product.'
-  })
+router.delete('/:id', async (req, res, next) => {
+  const id = req.params.id
+  try {
+    const deletedPost = await Product.deleteOne({ _id: id })
+    res.status(200).json(deletedPost)
+  } catch(err) {
+    res.status(500).json(err)
+  }
 })
 
 module.exports = router
