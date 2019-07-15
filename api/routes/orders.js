@@ -1,36 +1,91 @@
 const express = require('express')
 
+const Order = require('../models/order')
+
 const router = express.Router()
 
-router.get('/', (req, res, next) => {
-  res.status(200).json({
-    message: 'Orders were fetched'
-  })
-})
-
-router.get('/:id', (req, res, next) => {
-  res.status(200).json({
-    message: 'Order details',
-    id: req.params.id
-  })
-})
-
-router.post('/', (req, res, next) => {
-  const order = {
-    productId: req.body.productId,
-    quantity: req.body.quantity
+router.get('/', async (req, res, next) => {
+  try {
+    const orders = await Order.find().select('product quantity _id')
+    const response = {
+      count: orders.length,
+      products: orders.map(order => {
+        return {
+          product: order.product,
+          quantity: order.quantity,
+          id: order._id,
+          request: {
+            type: 'GET',
+            url: process.env.URL + '/orders/' + order._id
+          }
+        }
+      })
+    }
+    res.status(200).json(response)
+  } catch(err) {
+    res.status(500).json(err)
   }
-  res.status(201).json({
-    message: 'Order was created',
-    order
-  })
 })
 
-router.delete('/:id', (req, res, next) => {
-  res.status(200).json({
-    message: 'Order deleted',
-    id: req.params.id
+router.get('/:id', async (req, res, next) => {
+  const id = req.params.id
+  try {
+    const order = await Order.findById(id).select('product quantity _id')
+    const response = {
+      product: order.product,
+      quantity: order.quantity,
+      _id: order._id,
+      request: {
+        type: 'GET',
+        url: process.env.URL + '/orders'
+      }
+    }
+    res.status(200).json(response)
+  } catch(err) {
+    res.status(500).json(err)
+  }
+})
+
+router.post('/', async (req, res, next) => {
+  const order = new Order({
+    product: req.body.productId,
+    quantity: req.body.quantity
   })
+  try {
+    const savedOrder = await order.save()
+    const response = {
+      message: 'Order saved',
+      order: {
+        product: savedOrder.product,
+        quantity: savedOrder.quantity,
+        _id: savedOrder._id
+      }
+    }
+    res.status(201).json(response)
+  } catch(err) {
+    res.status(500).json(err)
+  }
+})
+
+router.delete('/:id', async (req, res, next) => {
+  const id = req.params.id
+  try {
+    const deletedOrder = await Order.deleteOne({ _id: id })
+    const response = {
+      message: 'Order deleted',
+      request: {
+        type: 'POST',
+        url: process.env.URL + '/orders',
+        body: {
+          productId: 'String',
+          quantity: 'Number'
+        }
+      }
+    }
+    res.status(200).json(response)
+  } catch(err) {
+    res.status(500).json(err)
+  }
 })
 
 module.exports = router
