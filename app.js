@@ -34,6 +34,9 @@ app.use('/products', productRoutes)
 const orderRoutes = require('./api/routes/orders')
 app.use('/orders', orderRoutes)
 
+const userRoutes = require('./api/routes/users')
+app.use('/user', userRoutes)
+
 app.use((req, res, next) => {
   const error = new Error('Not found')
   error.status = 404
