@@ -1,6 +1,7 @@
 const express = require('express')
 
 const Order = require('../models/order')
+const Product = require('../models/product')
 
 const router = express.Router()
 
@@ -47,11 +48,13 @@ router.get('/:id', async (req, res, next) => {
 })
 
 router.post('/', async (req, res, next) => {
-  const order = new Order({
-    product: req.body.productId,
-    quantity: req.body.quantity
-  })
   try {
+    const product = await Product.findById(req.body.productId)
+      .select('name price _id')
+    const order = new Order({
+      product,
+      quantity: req.body.quantity
+    })
     const savedOrder = await order.save()
     const response = {
       message: 'Order saved',
@@ -59,6 +62,10 @@ router.post('/', async (req, res, next) => {
         product: savedOrder.product,
         quantity: savedOrder.quantity,
         _id: savedOrder._id
+      },
+      request: {
+        type: 'GET',
+        url: process.env.URL + '/orders/' + savedOrder._id
       }
     }
     res.status(201).json(response)
