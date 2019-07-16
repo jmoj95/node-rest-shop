@@ -8,6 +8,7 @@ const router = express.Router()
 router.get('/', async (req, res, next) => {
   try {
     const orders = await Order.find().select('product quantity _id')
+      .populate('product', 'name price')
     const response = {
       count: orders.length,
       products: orders.map(order => {
@@ -32,6 +33,7 @@ router.get('/:id', async (req, res, next) => {
   const id = req.params.id
   try {
     const order = await Order.findById(id).select('product quantity _id')
+      .populate('product', 'name price')
     const response = {
       product: order.product,
       quantity: order.quantity,
