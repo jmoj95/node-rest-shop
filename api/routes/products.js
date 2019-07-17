@@ -43,7 +43,7 @@ router.get('/', async (req, res, next) => {
           _id: product._id,
           request: {
             type: 'GET',
-            url: process.env.URL + '/products/' + product._id
+            url: 'products/' + product._id
           }
         }
       })
@@ -66,7 +66,7 @@ router.get('/:id', async (req, res, next) => {
       _id: product._id,
       request: {
         type: "GET",
-        url: process.env.URL + '/products'
+        url: 'products'
       }
     }
     res.status(200).json(response)
@@ -94,7 +94,7 @@ router.post('/', upload.single('image'), async (req, res, next) => {
       },
       request: {
         type: 'GET',
-        url: process.env.URL + '/products/' + savedProduct._id
+        url: 'products/' + savedProduct._id
       }
     }
     res.status(201).json(response)
@@ -114,7 +114,7 @@ router.patch('/:id', async (req, res, next) => {
       message: 'Product updated',
       request: {
         type: 'GET',
-        url: process.env.URL + '/products/' + id
+        url: 'products/' + id
       }
     }
     res.status(200).json(response)
@@ -131,7 +131,7 @@ router.delete('/:id', async (req, res, next) => {
       message: 'Product deleted',
       request: {
         type: 'POST',
-        url: process.env.URL + '/products',
+        url: 'products',
         body: {
           name: 'String',
           price: 'Number'

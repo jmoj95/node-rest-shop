@@ -1,6 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const User = require('../models/user')
 
@@ -36,6 +37,37 @@ router.post('/signup', async (req, res, next) => {
       res.status(500).json(err)
     }
   })
+})
+
+router.post('/login', async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email })
+    if (user !== null) {
+      await bcrypt.compare(req.body.password, user.password, (err, response) => {
+        if (err !== null && response) {
+          const token = jwt.sign(
+            {
+              email: user.email,
+              userId: user._id
+            },
+            process.env.JWT_KEY,
+            {
+              expiresIn: "1h"
+            }
+          )
+          return res.status(200).json({
+            message: 'Auth successful',
+            token
+          })
+        }
+        return res.status(401).json({ message: 'Auth failed' })
+      })
+    } else {
+      return res.status(401).json({ message: 'Auth failed' })
+    }
+  } catch(err) {
+    res.status(500).json(err)
+  }
 })
 
 router.delete('/:id', async (req, res, next) => {
