@@ -1,11 +1,13 @@
 const express = require('express')
 
+const checkAuth = require('../middlewares/check-auth')
+
 const Order = require('../models/order')
 const Product = require('../models/product')
 
 const router = express.Router()
 
-router.get('/', async (req, res, next) => {
+router.get('/', checkAuth, async (req, res, next) => {
   try {
     const orders = await Order.find().select('product quantity _id')
       .populate('product', 'name price')
@@ -29,7 +31,7 @@ router.get('/', async (req, res, next) => {
   }
 })
 
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', checkAuth, async (req, res, next) => {
   const id = req.params.id
   try {
     const order = await Order.findById(id).select('product quantity _id')
@@ -49,7 +51,7 @@ router.get('/:id', async (req, res, next) => {
   }
 })
 
-router.post('/', async (req, res, next) => {
+router.post('/', checkAuth, async (req, res, next) => {
   try {
     const product = await Product.findById(req.body.productId)
       .select('name price _id')
@@ -76,7 +78,7 @@ router.post('/', async (req, res, next) => {
   }
 })
 
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', checkAuth, async (req, res, next) => {
   const id = req.params.id
   try {
     const deletedOrder = await Order.deleteOne({ _id: id })
